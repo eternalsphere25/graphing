@@ -1,0 +1,43 @@
+INPUT FORMAT GUIDE,,,
+filename,,,
+file_format,,,
+fig_title,,,
+x_title,,,
+y_title,,,
+,,,
+y_axis1,y_axis2,etc,
+label_1,label_2,etc,
+color_1,color_2,etc,
+mark_1,mark_2,etc,
+,,,
+x_axis_range,,,
+start,stop,increment,
+y_axis_range,,,
+start,stop,increment,
+,,,
+x_axis,y_axis1,y_axis2,etc
+[x_data],[y1_data],[y2_data],etc
+[…],[…],[…],[…]
+,,,
+,,,
+BEGIN INPUT BELOW,,,
+test,,,
+png,,,
+Sample Output,,,
+t (days),,,
+Score,,,
+,,,
+y_axis1,y_axis2,,
+Experiment,Control,,
+blue,red,,
+o,stop,,
+,,,
+x_axis_range,,,
+0,4,2,
+y_axis_range,,,
+70,110,10,
+,,,
+x_axis,y_axis1,y_axis2,y_axis3
+0,100,100,100
+2,78.6,81.4,90
+4,76.4,86.5,80
