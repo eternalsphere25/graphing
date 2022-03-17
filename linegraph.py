@@ -1,191 +1,92 @@
+#-------------------------------------------------------------------------------
+# This file contains presets for different types of pie charts
+# Contents are pretty much boilerplate code; either cut and paste or import this
+#   file into your driver file
+#-------------------------------------------------------------------------------
+
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.ticker import AutoMinorLocator
+from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 import pandas as pd
-import csv
-
-"""
-Customizaton instructions:
-https://matplotlib.org/stable/tutorials/introductory/customizing.html
-#print(fig.canvas.get_supported_filetypes())
-"""
-
-def setOutputFilename(name, extension):
-    value = name[0] + '.' + extension[0]
-    return value
-
-def removeEmptyValuesFromList(input_list):
-    while ("" in input_list):
-        input_list.remove("")
 
 
-#-------------------------------------------------------------------------------
-#PART 0: Define global variables
-#-------------------------------------------------------------------------------
+def calculate_exponential_decay(initial_amount, decay_rate, time):
+    data_list = [initial_amount*((1-(decay_rate/100))**t) for t in range(0, time, 1)]
+    return data_list
 
-input_file = 'inegraph_input_file.csv'
-char_enc = ['utf-8']
+def calculate_x_axis_pos(number_of_items, unit):
+    start = 0
+    stop = (number_of_items-1)*unit
+    array = np.linspace(start, stop, number_of_items)
+    return array
 
+def line_graph_basic(input_y_data, input_x_data, input_labels, xy_labels, output_file_name):
+    #Set font
+    set_default_font()
 
-#-------------------------------------------------------------------------------
-#PART 1: Import graph settings from csv file and clean data
-#-------------------------------------------------------------------------------
+    #Generate graph and data traces
+    fig, ax = plt.subplots(figsize=(10,8))
 
-#Import graph properties with CSV
-with open(input_file) as csv_file:
-    reader = csv.reader(csv_file)
+    ax.plot(input_x_data, input_y_data[0], color='red', marker='s', markersize=8)
+    ax.plot(input_x_data, input_y_data[1], color='blue', marker='o', markersize=8)
 
-    #First skip the formatting instruction rows
-    for skip in range(23):
-        next(reader)
-    
-    #Import filename, file format, figure title, and x/y axes titles
-    file_name = next(reader)
-    file_ext = next(reader)
-    graph_title = next(reader)
-    x_axis_title = next(reader)
-    y_axis_title = next(reader)
-    next(reader)
+    #Set axis labels
+    ax.set_ylabel(xy_labels[0], fontsize=24, labelpad=10, weight='bold')
+    ax.set_xlabel(xy_labels[1], fontsize=24, labelpad=5, weight='bold')
 
-    #Import data trace parameters
-    data_num = next(reader)
-    data_labels = next(reader)
-    data_colors = next(reader)
-    data_markers = next(reader)
-    next(reader)
+    #Set axis ranges
+    ax.set_xlim(-0.25, 10.25)
+    ax.set_ylim(-0.25, 101)
 
-    #Import x/y axis ranges
-    next(reader)
-    x_axis_range = next(reader)
-    next(reader)
-    y_axis_range = next(reader)
+    #Set major and minor ticks
+    ax.xaxis.set_major_locator(MultipleLocator(2))
+    ax.xaxis.set_minor_locator(AutoMinorLocator(2))
 
-#Import graph data with Pandas
-dataframe1 = pd.read_csv(input_file, skiprows=39, encoding=char_enc[0])
+    ax.yaxis.set_major_locator(MultipleLocator(20))
+    ax.yaxis.set_minor_locator(AutoMinorLocator(2))
 
-#Clean inputs (remove empty values)
-removeEmptyValuesFromList(file_name)
-removeEmptyValuesFromList(file_ext)
-removeEmptyValuesFromList(graph_title)
-removeEmptyValuesFromList(x_axis_title)
-removeEmptyValuesFromList(y_axis_title)
-removeEmptyValuesFromList(data_num)
-removeEmptyValuesFromList(data_labels)
-removeEmptyValuesFromList(data_colors)
-removeEmptyValuesFromList(data_markers)
-removeEmptyValuesFromList(x_axis_range)
-removeEmptyValuesFromList(y_axis_range)
-dataframe1 = dataframe1.dropna(axis=1, how='all')
+    #Set line widths
+    set_line_properties()
 
-#Clean inputs (convert str to int)
-x_axis_range = list(map(int, x_axis_range))
-y_axis_range = list(map(int, y_axis_range))
+    #Set tick length and width
+    ax.tick_params(which='major', length=7, width=2)
+    ax.tick_params(which='minor', length=4, width=2)
 
-"""
-print('\nInput Verification\n')
-print(file_name[0])
-print(file_ext[0])
-print(graph_title[0])
-print(x_axis_title[0])
-print(y_axis_title[0])
-print('')
-print(data_num)
-print(data_labels)
-print(data_colors)
-print(data_markers)
-print('')
-print(x_axis_range)
-print(y_axis_range)
-print('')
-print(dataframe1)
-"""
+    #Set legend
+    ax.legend(labels, loc="center right", fontsize=20, bbox_to_anchor=(1.35,0.5))
+
+    #Write to file
+    plt.savefig(output_file_name, bbox_inches='tight', pad_inches = 0.1)
+
+def set_default_font():
+    mpl.rcParams['font.size'] = 24
+    mpl.rcParams['font.family'] = 'sans-serif'
+    mpl.rcParams['font.sans-serif'] = ['Tahoma']
+    mpl.rcParams['font.weight'] = 'bold'
+
+def set_line_properties():
+    mpl.rcParams['lines.linewidth'] = 4
+    mpl.rcParams['axes.linewidth'] = 2
 
 
 #-------------------------------------------------------------------------------
-#PART 2: Process inputs for graphing
+# Basic linegraph - Sample
 #-------------------------------------------------------------------------------
 
-#Set output file name
-output_filename = setOutputFilename(file_name, file_ext)
+#Data and labels
+labels = ['Sample 1', 'Sample 2']
+y_data = [
+    calculate_exponential_decay(100, 50, 100),
+    calculate_exponential_decay(100, 20, 100)
+    ]
+x_data = calculate_x_axis_pos(len(y_data[0]), 1)
 
-#Increment axes end values for proper display
-x_axis_range[1] += 1
-y_axis_range[1] += 1
+#Axis labels
+xy_axis_labels = ['Amount Remaining (kg)', 't (years)']
 
-#Convert dataframe columns to list
-x_data = dataframe1['x_axis'].tolist()
-y1_data = dataframe1['y_axis1'].tolist()
-y2_data = dataframe1['y_axis2'].tolist()
+#Output file name
+file_name = 'output_line_graph.png'
 
-
-#-------------------------------------------------------------------------------
-#PART 3: Set graph properties
-#-------------------------------------------------------------------------------
-
-#Global style parameters
-mpl.rcParams['lines.linewidth'] = 10
-mpl.rcParams['font.size'] = 40
-mpl.rcParams['font.family'] = 'sans-serif'
-mpl.rcParams['font.sans-serif'] = ['Tahoma']
-mpl.rcParams['axes.linewidth'] = 1.5
-
-#Generate figure object, axes object(s), and set size
-fig, ax = plt.subplots(figsize=(10,8))
-
-#Generate each individual axis object
-ax.plot(
-    x_data,
-    y1_data,
-    color=data_colors[0],
-    label=data_labels[0],
-    marker=data_markers[0],
-    markersize=16
-)
-ax.plot(
-    x_data,
-    y2_data,
-    color=data_colors[1],
-    label=data_labels[1],
-    marker=data_markers[1],
-    markersize=16
-)
-
-#Set axis labels
-ax.set_ylabel(y_axis_title[0], fontsize=44, labelpad=28)
-ax.set_xlabel(x_axis_title[0], fontsize=44, labelpad=16)
-
-#Set axis ranges
-ax.set_xticks(range(x_axis_range[0], x_axis_range[1], x_axis_range[2]))
-ax.set_yticks(range(y_axis_range[0], y_axis_range[1], y_axis_range[2]))
-ax.xaxis.set_minor_locator(AutoMinorLocator(2))
-ax.yaxis.set_minor_locator(AutoMinorLocator(2))
-
-#Set tick styles
-ax.tick_params(which='major', length=8, width=3)
-ax.tick_params(which='minor', length=6, width=3)
-
-#Set spines
-ax.spines['left'].set_linewidth(3)
-ax.spines['right'].set_linewidth(3)
-ax.spines['top'].set_linewidth(3)
-ax.spines['bottom'].set_linewidth(3)
-
-#Set title and legend
-fig.suptitle(graph_title[0], fontsize=48, y=1.05)
-ax.legend(
-    loc='lower center',
-    ncol=2,
-    bbox_to_anchor=(0.5,-0.45),
-    fontsize=36,
-    markerscale=1.5
-)
-
-#Display and save figure to disk
-fig.savefig(
-    output_filename,
-    transparent=False,
-    dpi=80,
-    bbox_inches='tight'
-)
-#plt.show()
-print('\nGraph generated successfully')
+#Generate graph
+line_graph_basic(y_data, x_data, labels, xy_axis_labels, file_name)
